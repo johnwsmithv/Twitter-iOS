@@ -26,8 +26,15 @@ class homeTableViewController: UITableViewController {
         
         myRefreshControl.addTarget(self, action: #selector(loadTweets), for: .valueChanged)
         tableView.refreshControl = myRefreshControl
+        // Allow the rows to grow dynamically
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 150
+    }
+    
+    // Every time the view did appear
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        loadTweets()
     }
     
     // We are calling the API to access a certain number of tweets
@@ -39,7 +46,7 @@ class homeTableViewController: UITableViewController {
             // At the success, the information will be stored in the dictionary called tweets
             // We need to then fill this array with the tweets
             // Need self. due to the fact that we're in a closure
-            
+            print("Tweets are being refreshed")
             self.tweetArray.removeAll()
             for tweet in tweets {
                 self.tweetArray.append(tweet)
@@ -55,6 +62,10 @@ class homeTableViewController: UITableViewController {
         })
     }
     
+    func refreshTweetRetweetCount(){
+        self.tableView.reloadData()
+    }
+    
     // For infinite scolling!!
     func loadMoreTweets(){
         let tweetApiUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
@@ -64,7 +75,7 @@ class homeTableViewController: UITableViewController {
             // At the success, the information will be stored in the dictionary called tweets
             // We need to then fill this array with the tweets
             // Need self. due to the fact that we're in a closure
-            
+            print("Adding more Tweets!")
             self.tweetArray.removeAll()
             for tweet in tweets {
                 self.tweetArray.append(tweet)
@@ -115,6 +126,11 @@ class homeTableViewController: UITableViewController {
         if let imageData = data {
             cell.userProfileImage.image = UIImage(data: imageData)
         }
+        
+        cell.setFavorite(tweetArray[indexPath.row]["favorited"] as! Bool)
+        cell.setRetweet(tweetArray[indexPath.row]["retweeted"] as! Bool)
+        // Setting the ID of the tweet so we can Favorite and Retweet the tweet
+        cell.tweetId = tweetArray[indexPath.row]["id"] as! Int
         
         return cell
     }
